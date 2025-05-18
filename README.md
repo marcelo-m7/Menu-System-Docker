@@ -1,6 +1,29 @@
 # UAlg Cantina Weekly Menu System
 
 ## Description
+A system to manage and display the weekly menu for the UAlg cantina.
+
+## Features
+- Public weekly menu display
+- Admin panel for managing menu items, dishes, and allergens
+- User registration and authentication
+
+## Technologies Used
+- Backend: Flask (Python)
+- Database: MySQL
+- Frontend: Next.js (React)
+- Containerization: Docker, Docker Compose
+
+## Prerequisites
+- Docker and Docker Compose installed
+
+## Getting Started
+
+### Cloning the Repository
+
+# UAlg Cantina Weekly Menu System
+
+## Description
 A web application to display the weekly menu for the UAlg Cantina and allow administrators to manage menu items, dishes, and allergens.
 
 ## Getting Started
