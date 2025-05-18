@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+    {% include "includes/header.html" %}
+
+    <h1>Admin Dashboard</h1>
+
+    <div id="admin-content">
+        <!-- Content will be loaded by JavaScript -->
+        Loading admin content...
+    </div>
+
+    <h2>Dishes</h2>
+    <div id="dishes-list"></div>
+
+    <h3>Add/Edit Dish</h3>
+    <form id="add-dish-form">
+        <div>
+            <label for="dish-name">Name:</label>
+            <input type="text" id="dish-name" name="name" required>
+        </div>
+        <div>
+            <label for="dish-description">Description:</label>
+            <textarea id="dish-description" name="description"></textarea>
+        </div>
+        <div>
+            <label for="dish-allergens-id">Allergens ID:</label>
+            <input type="number" id="dish-allergens-id" name="allergens_id">
+        </div>
+        <input type="hidden" id="dish-id" name="dish_id">
+        <button type="submit">Add Dish</button>
+    </form>
+
+    <h2>Allergens</h2>
+    <div id="allergens-list"></div>
+
+    <h3>Add/Edit Allergen</h3>
+    <form id="add-allergen-form">
+        <div>
+            <label for="allergen-name">Name:</label>
+            <input type="text" id="allergen-name" name="name" required>
+        </div>
+        <input type="hidden" id="allergen-id" name="allergen_id">
+        <button type="submit">Add Allergen</button>
+    </form>
+
+    <h2>Menu Items</h2>
+    <div id="menu-items-list"></div>
+
+    <h3>Add/Edit Menu Item</h3>
+    <form id="add-menu-item-form">
+        <div>
+            <label for="week-start-date">Week Start Date:</label>
+            <input type="date" id="week-start-date" name="week_start_date" required>
+        </div>
+        <div>
+            <label for="week-end-date">Week End Date:</label>
+            <input type="date" id="week-end-date" name="week_end_date" required>
+        </div>
+        <div>
+            <label for="day-of-week">Day of Week:</label>
+            <input type="text" id="day-of-week" name="day_of_week" required>
+        </div>
+        <div>
+            <label for="dish-select">Dish:</label>
+            <select id="dish-select" name="dish_id" required>
+                <option value="">Select a Dish</option>
+            </select>
+        </div>
+        <input type="hidden" id="menu-item-id" name="menu_item_id">
+        <button type="submit">Add Menu Item</button>
+    </form>
+
+
+    {% include "includes/footer.html" %}
+
+    <script src="static/js/admin.js"></script>
+
+{% endblock %}

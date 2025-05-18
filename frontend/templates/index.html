@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Public Menu{% endblock %}
+
+{% block content %}
+    {% include "includes/header.html" %}
+
+    <h1>Weekly Menu</h1>
+    <div id="menu-container">
+        <!-- Menu will be loaded here by JavaScript -->
+        Loading menu...
+    </div>
+
+    {% include "includes/footer.html" %}
+
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% endblock %}
