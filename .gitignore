@@ -1,1 +1,25 @@
-.venv
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Flask
+instance/
+.flaskenv
+
+# Docker
+*.swp
+.dockerignore
+
+# Databases
+*.db
+
+# IDE specific files (e.g., VS Code)
+.vscode/

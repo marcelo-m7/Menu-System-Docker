@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = new FormData(loginForm);
 
-        fetch('http://127.0.0.1:5000/admin/login', {
+        fetch('/admin/login', {
             method: 'POST',
             body: formData
         })

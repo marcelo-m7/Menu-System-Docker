@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // --- Dish Management ---
 
   function fetchDishes() {
+    console.log("Fetching dishes...");
     fetch('http://127.0.0.1:5000/admin/dishes')
       .then((response) => response.json())
       .then((dishes) => {
@@ -54,10 +55,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const ul = document.createElement('ul');
+        // Add a title for the dishes list
+        const title = document.createElement('h3');
+        title.textContent = 'Dishes';
+        dishesList.appendChild(title);
         dishes.forEach(dish => {
           const li = document.createElement('li');
           li.textContent = `${dish.name} (Description: ${dish.description || 'N/A'}) (Allergen ID: ${dish.allergens_id || 'N/A'})`;
-
           const editButton = document.createElement('button');
           editButton.textContent = 'Edit';
           editButton.dataset.dishId = dish.id;
@@ -75,9 +79,9 @@ document.addEventListener('DOMContentLoaded', function () {
         dishesList.appendChild(ul);
         populateDishSelect(); // Refresh dish select dropdown in case dishes changed
             })
-            .catch(error => {
-                console.error('Error fetching dishes:', error);
-                dishesList.innerHTML = '<p>Error loading dishes.</p>';
+      .catch(error => {
+        console.error('Error fetching dishes:', error);
+        dishesList.innerHTML = '<p>Error loading dishes.</p>';
             });
     }
 
@@ -115,42 +119,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  addDishForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-
-    const formData = new FormData(addDishForm);
-    const url = editingDishId !== null ?
-      `http://127.0.0.1:5000/admin/dishes/${editingDishId}` :
-      'http://127.0.0.1:5000/admin/dishes';
-    const method = editingDishId ? 'PUT' : 'POST';
-
-    fetch(url, {
-      method: method,
-      body: formData,
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Failed to save dish');
-        }
-      })
-      .then((data) => {
-        addDishForm.reset(); // Clear the form
-        document.getElementById('add-dish-form').querySelector('button[type="submit"]').textContent = 'Add Dish';
-        editingDishId = null; // Reset editing state
-        fetchDishes(); // Refresh the dish list
-        populateDishSelect(); // Refresh dish select dropdown if dishes changed
-      })
-      .catch((error) => {
-        console.error('Error saving dish:', error);
-        alert('Error saving dish: ' + error.message);
-      });
-  });
-
   // --- Allergen Management ---
 
   function fetchAllergens() {
+    console.log("Fetching allergens...");
     fetch('http://127.0.0.1:5000/admin/allergens')
       .then((response) => response.json())
       .then((allergens) => {
@@ -162,6 +134,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const ul = document.createElement('ul');
+        // Add a title for the allergens list
+        const title = document.createElement('h3');
+        title.textContent = 'Allergens';
+        allergensList.appendChild(title);
         allergens.forEach(allergen => {
           const li = document.createElement('li');
           li.textContent = allergen.name;
@@ -227,14 +203,53 @@ document.addEventListener('DOMContentLoaded', function () {
   addAllergenForm.addEventListener('submit', function (event) {
     event.preventDefault();
 
-    const formData = new FormData(addAllergenForm);
-    const url = editingAllergenId !== null ?
-      `http://127.0.0.1:5000/admin/allergens/${editingAllergenId}` : 'http://127.0.0.1:5000/admin/allergens';
+        const formData = new FormData(addAllergenForm);
+        const url = editingAllergenId !== null ?
+            `http://127.0.0.1:5000/admin/allergens/${editingAllergenId}` : 'http://127.0.0.1:5000/admin/allergens';
         const method = editingAllergenId ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            body: formData,
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Failed to save allergen');
+                    });
+                }
+            })
+            .then(data => {
+                addAllergenForm.reset(); // Clear the form
+                addAllergenForm.querySelector('button[type="submit"]').textContent = 'Add Allergen';
+                editingAllergenId = null; // Reset editing state
+                fetchAllergens(); // Refresh the list
+                alert('Allergen saved successfully!');
+            })
+            .catch(error => {
+                console.error('Error saving allergen:', error);
+                alert('Error saving allergen: ' + error.message);
+            });
+    });
+
+    addDishForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(addDishForm);
+        const url = editingDishId !== null ?
+            `http://127.0.0.1:5000/admin/dishes/${editingDishId}` :
+            'http://127.0.0.1:5000/admin/dishes';
+        const method = editingDishId ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
 
     // --- Menu Item Management ---
 
     function fetchMenuItems() {
+        console.log("Fetching menu items...");
         fetch('http://127.0.0.1:5000/admin/menu_items')
             .then(response => response.json())
             .then(menuItems => {
@@ -244,8 +259,32 @@ document.addEventListener('DOMContentLoaded', function () {
                     menuItemsList.innerHTML = '<p>No menu items available.</p>';
                     return;
                 }
+                body: formData,
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return response.json().then(data => {
+                             throw new Error(data.message || 'Failed to save dish');
+                        });
+                    }
+                })
+                .then((data) => {
+                    addDishForm.reset(); // Clear the form
+                    document.getElementById('add-dish-form').querySelector('button[type="submit"]').textContent = 'Add Dish';
+                    editingDishId = null; // Reset editing state
+                    fetchDishes(); // Refresh the dish list
+                    populateDishSelect(); // Refresh dish select dropdown if dishes changed
+                    alert('Dish saved successfully!');
+                })
+                }
 
         const ul = document.createElement('ul');
+        // Add a title for the menu items list
+        const title = document.createElement('h3');
+        title.textContent = 'Weekly Menu Items';
+        menuItemsList.appendChild(title);
         menuItems.forEach(item => {
           const li = document.createElement('li');
           li.textContent = `${item.day_of_week}, ${item.week_start_date} to ${item.week_end_date}: ${item.dish_name} (Allergens: ${item.allergen_name || 'None'})`;
@@ -281,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function () {
         option.textContent = dish.name;
         dishSelect.appendChild(option);
       });
-    });
+    }
 
     function handleEditMenuItem(event) {
       const menuItem = JSON.parse(event.target.dataset.menuItem);
@@ -295,9 +334,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function handleDeleteMenuItem(event) {
         const menuItemId = event.target.dataset.menuItemId;
-        if (confirm('Are you sure you want to delete this menu item?')) {
             fetch(`http://127.0.0.
-      fetch(`http://127.0.0.1:5000/admin/menu_items/${menuItemId}`, {
+            fetch(`http://127.0.0.1:5000/admin/menu_items/${menuItemId}`, {
         method: 'DELETE',
       })
         .then((response) => {
@@ -314,7 +352,6 @@ document.addEventListener('DOMContentLoaded', function () {
           alert('An error occurred while deleting the menu item.');
         });
     }
-  }
 
   addMenuItemForm.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -341,7 +378,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (response.ok) {
           return response.json();
         } else {
-          throw new Error('Failed to save menu item');
+             return response.json().then(data => {
+                 throw new Error(data.message || 'Failed to save menu item');
+             });
         }
       })
       .then((data) => {
@@ -349,6 +388,7 @@ document.addEventListener('DOMContentLoaded', function () {
         addMenuItemForm.querySelector('button[type="submit"]').textContent = 'Add Menu Item';
         editingMenuItemId = null; // Reset editing state
         fetchMenuItems(); // Refresh the list
+        alert('Menu item saved successfully!');
       })
       .catch((error) => {
         console.error('Error saving menu item:', error);
