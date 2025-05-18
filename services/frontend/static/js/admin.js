@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
   let editingAllergenId = null; // To keep track of the allergen being edited
   let editingMenuItemId = null; // To keep track of the menu item being edited
   let dishesData = []; // Store dishes for populating dropdown
+  const messageArea = document.getElementById('admin-message-area'); // Assuming you add an element with id="admin-message-area" in admin.html
   const logoutButton = document.getElementById('logout-button'); // Assuming you add an element with id="logout-button" in admin.html
 
   // --- Authentication Check and Initial Data Fetch ---
@@ -41,6 +42,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
   // --- Dish Management ---
+
+    function displayMessage(message, type = 'success') {
+        messageArea.textContent = message;
+        messageArea.style.color = type === 'success' ? 'green' : 'red';
+    }
 
   function fetchDishes() {
     console.log("Fetching dishes...");
@@ -171,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .catch((error) => {
         console.error('Error fetching allergen for edit:', error);
-        alert('Error loading allergen details.');
+        displayMessage('Error loading allergen details.', 'error');
       });
   }
 
@@ -187,12 +193,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
                         response.json().then(data => {
                             alert('Error deleting dish: ' + (data.message || 'Unknown error'));
+                            displayMessage('Error deleting dish: ' + (data.message || 'Unknown error'), 'error');
                         });
                     }
                 })
                 .catch(error => {
                     console.error('Error deleting dish:', error);
-                    alert('An error occurred while deleting the dish.');
                 });
         }
     }
@@ -209,12 +215,12 @@ document.addEventListener('DOMContentLoaded', function () {
           } else {
             response.json().then((data) => {
               alert('Error deleting allergen: ' + (data.message || 'Unknown error'));
+              displayMessage('Error deleting allergen: ' + (data.message || 'Unknown error'), 'error');
             });
           }
         })
         .catch((error) => {
           console.error('Error deleting allergen:', error);
-          alert('An error occurred while deleting the allergen.');
         });
     }
   }
@@ -230,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         fetch(url, {
             method: method,
+            headers: {'Content-Type': 'application/json'}, // Specify content type
             body: formData,
         })
             .then(response => {
@@ -245,11 +252,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 addAllergenForm.reset(); // Clear the form
                 addAllergenForm.querySelector('button[type="submit"]').textContent = 'Add Allergen';
                 editingAllergenId = null; // Reset editing state
+                displayMessage('Allergen saved successfully!', 'success');
                 fetchAllergens(); // Refresh the list
-                alert('Allergen saved successfully!');
             })
             .catch(error => {
                 console.error('Error saving allergen:', error);
+                displayMessage('Error saving allergen: ' + error.message, 'error');
                 alert('Error saving allergen: ' + error.message);
     });
 
@@ -264,6 +272,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         fetch(url, {
             method: method,
+            headers: {'Content-Type': 'application/json'}, // Specify content type
 
 
         // --- Menu Item Management ---
@@ -295,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 editingDishId = null; // Reset editing state
                 fetchDishes(); // Refresh the dish list
                 populateDishSelect(); // Refresh dish select dropdown if dishes changed
-                alert('Dish saved successfully!');
+                displayMessage('Dish saved successfully!', 'success');
             })
     })
 
@@ -362,12 +371,12 @@ document.addEventListener('DOMContentLoaded', function () {
           } else {
             response.json().then((data) => {
               alert('Error deleting menu item: ' + (data.message || 'Unknown error'));
+              displayMessage('Error deleting menu item: ' + (data.message || 'Unknown error'), 'error');
             });
           }
         })
         .catch((error) => {
           console.error('Error deleting menu item:', error);
-          alert('An error occurred while deleting the menu item.');
         });
     }
 
@@ -384,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectedDishId = dishSelect.value;
     if (!selectedDishId) {
       alert('Please select a dish.');
-      return; // Stop submission if no dish is selected
+        displayMessage('Please select a dish.', 'error');
     }
     formData.set('dish_id', selectedDishId); // Add or update dish_id in form data
 
@@ -405,12 +414,12 @@ document.addEventListener('DOMContentLoaded', function () {
         addMenuItemForm.reset(); // Clear the form
         addMenuItemForm.querySelector('button[type="submit"]').textContent = 'Add Menu Item';
         editingMenuItemId = null; // Reset editing state
+        displayMessage('Menu item saved successfully!', 'success');
         fetchMenuItems(); // Refresh the list
-        alert('Menu item saved successfully!');
       })
       .catch((error) => {
         console.error('Error saving menu item:', error);
-        alert('Error saving menu item: ' + error.message);
+        displayMessage('Error saving menu item: ' + error.message, 'error');
       });
   });
 

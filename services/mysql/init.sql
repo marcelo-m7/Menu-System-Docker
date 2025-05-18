@@ -62,3 +62,32 @@ INSERT INTO users (username, hashed_password) VALUES ('admin', 'hashed_password_
 -- Link the default admin user to the 'admin' role
 -- Assumes the 'admin' user and 'admin' role are the first entries in their respective tables
 INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
+
+-- Seed Data
+-- Insert sample allergens
+INSERT INTO Alergenos (name) VALUES ('Gluten');
+INSERT INTO Alergenos (name) VALUES ('Dairy');
+INSERT INTO Alergenos (name) VALUES ('Nuts');
+INSERT INTO Alergenos (name) VALUES ('Soy');
+
+-- Insert sample dishes
+INSERT INTO Pratos (name, description, allergens_id) VALUES ('Grilled Chicken Salad', 'Fresh salad with grilled chicken breast.', NULL); -- No primary allergen from the list
+INSERT INTO Pratos (name, description, allergens_id) VALUES ('Beef Lasagna', 'Classic beef lasagna with bechamel sauce.', 1); -- Gluten
+INSERT INTO Pratos (name, description, allergens_id) VALUES ('Vegetable Curry', 'Mild vegetable curry with coconut milk.', 4); -- Soy (assuming soy sauce or tofu)
+INSERT INTO Pratos (name, description, allergens_id) VALUES ('Fish and Chips', 'Fried fish with potato chips.', 1); -- Gluten
+INSERT INTO Pratos (name, description, allergens_id) VALUES ('Pasta Carbonara', 'Pasta with creamy egg and cheese sauce.', 2); -- Dairy
+
+-- Insert sample menu items for a week
+-- Assuming week starts on Monday
+INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES ('2023-10-23', '2023-10-29', 'Monday', 1); -- Grilled Chicken Salad
+INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES ('2023-10-23', '2023-10-29', 'Tuesday', 2); -- Beef Lasagna
+INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES ('2023-10-23', '2023-10-29', 'Wednesday', 3); -- Vegetable Curry
+INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES ('2023-10-23', '2023-10-29', 'Thursday', 4); -- Fish and Chips
+INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES ('2023-10-23', '2023-10-29', 'Friday', 5); -- Pasta Carbonara
+
+-- Insert sample menu items for the next week
+INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES ('2023-10-30', '2023-11-05', 'Monday', 5); -- Pasta Carbonara
+INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES ('2023-10-30', '2023-11-05', 'Tuesday', 1); -- Grilled Chicken Salad
+INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES ('2023-10-30', '2023-11-05', 'Wednesday', 2); -- Beef Lasagna
+INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES ('2023-10-30', '2023-11-05', 'Thursday', 3); -- Vegetable Curry
+INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES ('2023-10-30', '2023-11-05', 'Friday', 4); -- Fish and Chips

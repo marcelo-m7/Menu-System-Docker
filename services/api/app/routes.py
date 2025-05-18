@@ -1,6 +1,9 @@
 from flask import Blueprint, jsonify, request, render_template, session, redirect, url_for
 from .auth import login_required, role_required
-from .models import get_db, add_user, get_user_by_username, get_user_by_firebase_uid
+from .models import (get_db, add_user, get_user_by_username, get_user_by_firebase_uid,
+                     get_all_dishes, get_dish_by_id, add_dish, update_dish, delete_dish,
+                     get_all_allergens, get_allergen_by_id, add_allergen, update_allergen, delete_allergen, get_allergen_by_name,
+                     get_all_menu_items, get_menu_item_by_id, add_menu_item, update_menu_item, delete_menu_item, get_menu_data)
 from .models import get_db
 
 bp = Blueprint('routes', __name__)
@@ -19,21 +22,8 @@ def admin_page():
 
 @bp.route('/menu')
 def get_menu():
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute('''
-        SELECT
-            Ementas.week_start_date,
-            Ementas.week_end_date,
-            Ementas.day_of_week,
-            Pratos.name AS dish_name,
-            Pratos.description AS dish_description,
-            Alergenos.name AS allergen_name
-        FROM Ementas
-        JOIN Pratos ON Ementas.dish_id = Pratos.id
-        LEFT JOIN Alergenos ON Pratos.allergens_id = Alergenos.id
-    ''')
-    menu_data = cursor.fetchall()
+    # Use the get_menu_data function from models
+    menu_data = get_menu_data()
 
     return jsonify([dict(row) for row in menu_data])
 
@@ -48,14 +38,10 @@ def admin_test():
 @login_required
 @role_required('admin')
 def manage_dishes():
-    db = get_db()
-    cursor = db.cursor()
-
     if request.method == 'GET':
-        cursor.execute('SELECT * FROM Pratos')
-        dishes = cursor.fetchall()
+        # Use the get_all_dishes function
+        dishes = get_all_dishes()
         return jsonify([dict(row) for row in dishes])
-
     elif request.method == 'POST':
         name = request.form.get('name')
         description = request.form.get('description')
@@ -65,13 +51,11 @@ def manage_dishes():
             return jsonify({'message': 'Dish name is required'}), 400
 
         if allergens_id:
-            cursor.execute('SELECT id FROM Alergenos WHERE id = ?', (allergens_id,))
-            allergen = cursor.fetchone()
+            # Validate allergen_id using get_allergen_by_id
+            allergen = get_allergen_by_id(allergens_id)
             if allergen is None:
                 return jsonify({'message': f'Allergen with ID {allergens_id} not found'}), 400
 
-        cursor.execute('INSERT INTO Pratos (name, description, allergens_id) VALUES (?, ?, ?)', (name, description, allergens_id))
-        db.commit()
         return jsonify({'message': 'Dish added successfully'}), 201
 
 @bp.route('/admin/dishes/<int:dish_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -79,12 +63,10 @@ def manage_dishes():
 @role_required('admin')
 def manage_single_dish(dish_id):
     db = get_db()
-    cursor = db.cursor()
 
     if request.method == 'GET':
-        cursor.execute('SELECT * FROM Pratos WHERE id = ?', (dish_id,))
-        dish = cursor.fetchone()
-        if dish:
+        # Use the get_dish_by_id function
+        dish = get_dish_by_id(dish_id)
             return jsonify(dict(dish))
         return jsonify({'message': 'Dish not found'}), 404
 
@@ -94,12 +76,11 @@ def manage_single_dish(dish_id):
         allergens_id = request.form.get('allergens_id')
 
         if allergens_id:
-            cursor.execute('SELECT id FROM Alergenos WHERE id = ?', (allergens_id,))
-            allergen = cursor.fetchone()
+            # Validate allergen_id using get_allergen_by_id
+            allergen = get_allergen_by_id(allergens_id)
             if allergen is None:
                 return jsonify({'message': f'Allergen with ID {allergens_id} not found'}), 400
 
-        cursor.execute('UPDATE Pratos SET name = ?, description = ?, allergens_id = ? WHERE id = ?', (name, description, allergens_id, dish_id))
         db.commit()
         return jsonify({'message': 'Dish updated successfully'})
 
@@ -113,13 +94,10 @@ def manage_single_dish(dish_id):
 @login_required
 @role_required('admin')
 def manage_allergens():
-    db = get_db()
-    cursor = db.cursor()
-
     if request.method == 'GET':
-        cursor.execute('SELECT * FROM Alergenos')
-        allergens = cursor.fetchall()
+        # Use the get_all_allergens function
         return jsonify([dict(row) for row in allergens])
+
 
     elif request.method == 'POST':
         name = request.form.get('name')
@@ -128,12 +106,10 @@ def manage_allergens():
             return jsonify({'message': 'Allergen name is required'}), 400
 
         cursor.execute('SELECT id FROM Alergenos WHERE name = ?', (name,))
-        existing_allergen = cursor.fetchone()
+        # Use get_allergen_by_name to check if allergen already exists
+        existing_allergen = get_allergen_by_name(name)
         if existing_allergen:
             return jsonify({'message': f'Allergen with name "{name}" already exists'}), 400
-
-        cursor.execute('INSERT INTO Alergenos (name) VALUES (?)', (name,))
-        db.commit()
         return jsonify({'message': 'Allergen added successfully'}), 201
 
 @bp.route('/admin/allergens/<int:allergen_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -141,12 +117,10 @@ def manage_allergens():
 @role_required('admin')
 def manage_single_allergen(allergen_id):
     db = get_db()
-    cursor = db.cursor()
 
     if request.method == 'GET':
-        cursor.execute('SELECT * FROM Alergenos WHERE id = ?', (allergen_id,))
-        allergen = cursor.fetchone()
-        if allergen:
+        # Use the get_allergen_by_id function
+        allergen = get_allergen_by_id(allergen_id)
             return jsonify(dict(allergen))
         return jsonify({'message': 'Allergen not found'}), 404
 
@@ -156,7 +130,6 @@ def manage_single_allergen(allergen_id):
         if not name:
             return jsonify({'message': 'Allergen name is required'}), 400
 
-        cursor.execute('UPDATE Alergenos SET name = ? WHERE id = ?', (name, allergen_id))
         db.commit()
         return jsonify({'message': 'Allergen updated successfully'})
 
@@ -170,16 +143,8 @@ def manage_single_allergen(allergen_id):
 @login_required
 @role_required('admin')
 def manage_menu_items():
-    db = get_db()
-    cursor = db.cursor()
-
     if request.method == 'GET':
-        cursor.execute('''
-            SELECT Ementas.id, Ementas.week_start_date, Ementas.week_end_date, Ementas.day_of_week, Pratos.name AS dish_name
-            FROM Ementas
-            JOIN Pratos ON Ementas.dish_id = Pratos.id
-        ''')
-        menu_items = cursor.fetchall()
+        # Use the get_all_menu_items function
         return jsonify([dict(row) for row in menu_items])
 
     elif request.method == 'POST':
@@ -199,11 +164,10 @@ def manage_menu_items():
              return jsonify({'message': 'Invalid dish_id'}), 400
 
         cursor.execute('SELECT id FROM Pratos WHERE id = ?', (dish_id,))
-        dish = cursor.fetchone()
+        # Use get_dish_by_id to validate dish_id
+        dish = get_dish_by_id(dish_id)
         if dish is None:
             return jsonify({'message': f'Dish with ID {dish_id} not found'}), 400
-            
-        cursor.execute('INSERT INTO Ementas (week_start_date, week_end_date, day_of_week, dish_id) VALUES (?, ?, ?, ?)', (week_start_date, week_end_date, day_of_week, dish_id))
         db.commit()
         return jsonify({'message': 'Menu item added successfully'}), 201
 @bp.route('/admin/menu_items/<int:menu_item_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -211,17 +175,10 @@ def manage_menu_items():
 @login_required
 def manage_single_menu_item(menu_item_id):
     db = get_db()
-    cursor = db.cursor()
-
     if request.method == 'GET':
-        cursor.execute('''
-            SELECT Ementas.id, Ementas.week_start_date, Ementas.week_end_date, Ementas.day_of_week, Pratos.name AS dish_name, Ementas.dish_id
-            FROM Ementas
-            JOIN Pratos ON Ementas.dish_id = Pratos.id
-            WHERE Ementas.id = ?
-        ''', (menu_item_id,))
-        menu_item = cursor.fetchone()
-        if menu_item:
+        # Use the get_menu_item_by_id function
+        menu_item = get_menu_item_by_id(menu_item_id)
+        if menu_item: # Check if menu_item is not None
             return jsonify(dict(menu_item))
         return jsonify({'message': 'Menu item not found'}), 404
 
@@ -238,10 +195,10 @@ def manage_single_menu_item(menu_item_id):
             except ValueError:
                  return jsonify({'message': 'Invalid dish_id'}), 400
             cursor.execute('SELECT id FROM Pratos WHERE id = ?', (dish_id,))
-            dish = cursor.fetchone()
+            # Use get_dish_by_id to validate dish_id if provided
+            dish = get_dish_by_id(dish_id)
             if dish is None:
                 return jsonify({'message': f'Dish with ID {dish_id} not found'}), 400
-
         cursor.execute('UPDATE Ementas SET week_start_date = ?, week_end_date = ?, day_of_week = ?, dish_id = ? WHERE id = ?', (week_start_date, week_end_date, day_of_week, dish_id, menu_item_id))
         db.commit()
         return jsonify({'message': 'Menu item updated successfully'})

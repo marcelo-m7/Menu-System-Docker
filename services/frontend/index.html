@@ -1,25 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>UAlg Cantina Menu</title>
-    <style>
-        /* Add some basic styling here if you like */
-        body {
-            font-family: sans-serif;
-        }
-        .menu-item {
-            border: 1px solid #ccc;
-            margin: 10px;
-            padding: 10px;
-        }
-    </style>
+    <title>UAlg Cantina Weekly Menu System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Weekly Menu</h1>
-    <div id="menu-container">
-        <!-- Menu will be loaded here by JavaScript -->
-        Loading menu...
+
+    <div id="app">
+        <!-- Content will be loaded here by the router -->
     </div>
-    <script src="static/js/index.js"></script>
+
+    <script src="{{ url_for('static', filename='js/lib/navigo.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/router.js') }}"></script>
 </body>
 </html>
