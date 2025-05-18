@@ -27,12 +27,38 @@ CREATE TABLE IF NOT EXISTS Ementas (
     FOREIGN KEY (dish_id) REFERENCES Pratos(id)
 );
 
--- Create Controlo_de_Acesso table
-CREATE TABLE IF NOT EXISTS Controlo_de_Acesso (
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL
+    firebase_uid VARCHAR(255) UNIQUE NULL,
+    email VARCHAR(255) UNIQUE NULL,
+    hashed_password VARCHAR(225) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert a default admin user (replace 'hashed_password_here' with an actual hashed password)
-INSERT INTO Controlo_de_Acesso (username, password) VALUES ('admin', 'hashed_password_here');
+-- Create roles table
+CREATE TABLE IF NOT EXISTS roles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+
+-- Create user_roles table
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id INT,
+    role_id INT,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+);
+
+-- Insert initial data
+INSERT INTO roles (name) VALUES ('admin');
+
+-- Insert a default admin user (replace 'hashed_password_for_admin' with an actual hashed password)
+-- You'll need to generate a hashed password using Werkzeug's generate_password_hash
+INSERT INTO users (username, hashed_password) VALUES ('admin', 'hashed_password_for_admin');
+
+-- Link the default admin user to the 'admin' role
+-- Assumes the 'admin' user and 'admin' role are the first entries in their respective tables
+INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);

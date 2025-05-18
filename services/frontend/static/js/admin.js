@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
   let editingAllergenId = null; // To keep track of the allergen being edited
   let editingMenuItemId = null; // To keep track of the menu item being edited
   let dishesData = []; // Store dishes for populating dropdown
+  const logoutButton = document.getElementById('logout-button'); // Assuming you add an element with id="logout-button" in admin.html
 
   // --- Authentication Check and Initial Data Fetch ---
   fetch('http://127.0.0.1:5000/admin/test')
@@ -96,30 +97,27 @@ document.addEventListener('DOMContentLoaded', function () {
         editingDishId = dish.id; // Set the ID of the dish being edited
     }
 
-
-  function handleDeleteDish(event) {
-    const dishId = event.target.dataset.dishId;
-    if (confirm('Are you sure you want to delete this dish?')) {
-      fetch(`http://127.0.0.1:5000/admin/dishes/${dishId}`, {
-        method: 'DELETE',
-      })
-        .then((response) => {
-          if (response.ok) {
-            fetchDishes(); // Refresh the list
-          } else {
-            response.json().then((data) => {
-              alert('Error deleting dish: ' + (data.message || 'Unknown error'));
-            });
-          }
-        })
-        .catch((error) => {
-          console.error('Error deleting dish:', error);
-          alert('An error occurred while deleting the dish.');
+}
+  // --- Allergen Management ---
+  // --- Logout ---
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            fetch('http://127.0.0.1:5000/admin/logout')
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/admin_login.html'; // Redirect to login page on successful logout
+                    } else {
+                        // Handle logout error if necessary
+                        console.error('Logout failed');
+                        alert('Logout failed.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during logout:', error);
+                });
         });
     }
-  }
-
-  // --- Allergen Management ---
 
   function fetchAllergens() {
     console.log("Fetching allergens...");
@@ -177,10 +175,31 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   }
 
-  function handleDeleteAllergen(event) {
+    function handleDeleteDish(event) {
+        const dishId = event.target.dataset.dishId;
+        if (confirm('Are you sure you want to delete this dish?')) {
+            fetch(`http://127.0.0.1:5000/admin/dishes/${dishId}`, {
+                method: 'DELETE',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        fetchDishes(); // Refresh the list
+                    } else {
+                        response.json().then(data => {
+                            alert('Error deleting dish: ' + (data.message || 'Unknown error'));
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting dish:', error);
+                    alert('An error occurred while deleting the dish.');
+                });
+        }
+    }
+
+    function handleDeleteAllergen(event) {
     const allergenId = event.target.dataset.allergenId;
     if (confirm('Are you sure you want to delete this allergen?')) {
-
       fetch(`http://127.0.0.1:5000/admin/allergens/${allergenId}`, {
         method: 'DELETE',
       })
@@ -199,6 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
   }
+
 
   addAllergenForm.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -231,7 +251,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => {
                 console.error('Error saving allergen:', error);
                 alert('Error saving allergen: ' + error.message);
-            });
     });
 
     addDishForm.addEventListener('submit', function (event) {
@@ -246,8 +265,8 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch(url, {
             method: method,
 
-    // --- Menu Item Management ---
 
+        // --- Menu Item Management ---
     function fetchMenuItems() {
         console.log("Fetching menu items...");
         fetch('http://127.0.0.1:5000/admin/menu_items')
@@ -259,33 +278,33 @@ document.addEventListener('DOMContentLoaded', function () {
                     menuItemsList.innerHTML = '<p>No menu items available.</p>';
                     return;
                 }
-                body: formData,
-            })
-                .then((response) => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        return response.json().then(data => {
-                             throw new Error(data.message || 'Failed to save dish');
-                        });
-                    }
-                })
-                .then((data) => {
-                    addDishForm.reset(); // Clear the form
-                    document.getElementById('add-dish-form').querySelector('button[type="submit"]').textContent = 'Add Dish';
-                    editingDishId = null; // Reset editing state
-                    fetchDishes(); // Refresh the dish list
-                    populateDishSelect(); // Refresh dish select dropdown if dishes changed
-                    alert('Dish saved successfully!');
-                })
+            body: formData,
+        })
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Failed to save dish');
+                    });
                 }
+            })
+            .then((data) => {
+                addDishForm.reset(); // Clear the form
+                document.getElementById('add-dish-form').querySelector('button[type="submit"]').textContent = 'Add Dish';
+                editingDishId = null; // Reset editing state
+                fetchDishes(); // Refresh the dish list
+                populateDishSelect(); // Refresh dish select dropdown if dishes changed
+                alert('Dish saved successfully!');
+            })
+    })
 
         const ul = document.createElement('ul');
         // Add a title for the menu items list
         const title = document.createElement('h3');
         title.textContent = 'Weekly Menu Items';
         menuItemsList.appendChild(title);
-        menuItems.forEach(item => {
+        menuItems.forEach(item => { // Removed a duplicate closing curly brace here
           const li = document.createElement('li');
           li.textContent = `${item.day_of_week}, ${item.week_start_date} to ${item.week_end_date}: ${item.dish_name} (Allergens: ${item.allergen_name || 'None'})`;
 
@@ -307,10 +326,10 @@ document.addEventListener('DOMContentLoaded', function () {
         menuItemsList.appendChild(ul);
             })
             .catch(error => {
-                console.error('Error fetching menu items:', error);
-                menuItemsList.innerHTML = '<p>Error loading menu items.</p>';
+              console.error('Error fetching menu items:', error);
+              menuItemsList.innerHTML = '<p>Error loading menu items.</p>';
             });
-    }
+          }
     function populateDishSelect() {
       // Assuming dishesData is already fetched by fetchDishes()
       dishSelect.innerHTML = '<option value="">Select a Dish</option>'; // Clear existing options
@@ -333,9 +352,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleDeleteMenuItem(event) {
-        const menuItemId = event.target.dataset.menuItemId;
-            fetch(`http://127.0.0.
-            fetch(`http://127.0.0.1:5000/admin/menu_items/${menuItemId}`, {
+      const menuItemId = event.target.dataset.menuItemId;
+      fetch(`http://127.0.0.1:5000/admin/menu_items/${menuItemId}`, {
         method: 'DELETE',
       })
         .then((response) => {
