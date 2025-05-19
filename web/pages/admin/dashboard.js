@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
+// Assuming you have a Layout component, import and use it
 const AdminDashboardPage = () => {
   const { isLoggedIn } = useAuth();
   const router = useRouter();
@@ -14,9 +16,22 @@ const AdminDashboardPage = () => {
   }, [isLoggedIn, router]); // Add router to dependencies
 
   return isLoggedIn ? (
-    < div >
+
+    // Wrap the content with the Layout component
+    <div>
       <h1>Admin Dashboard</h1>
-      <p>This is the admin dashboard page. (Content coming soon)</p>
+      <p>Welcome to the admin dashboard. Select a section to manage:</p>
+      <ul>
+        <li>
+          <Link href="/admin/dishes">Manage Dishes</Link>
+        </li>
+        <li>
+          <Link href="/admin/allergens">Manage Allergens</Link>
+        </li>
+        <li>
+          <Link href="/admin/menu-items">Manage Weekly Menu Items</Link>
+        </li>
+      </ul>
     </div>
   ) : null; // Don't render anything if not logged in (useEffect will redirect)
 };
