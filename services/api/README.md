@@ -24,7 +24,11 @@ Project dependencies are listed in `requirements.txt`.
 API configuration, including database connection details and the secret key, is managed through environment variables (primarily via `docker-compose.yml` and potentially a `.env` file).
 
 ## API Endpoints
-(Provide more detailed documentation for the API endpoints here.)
+This section provides a brief overview of the API endpoints. For more detailed information, refer to the code within the `app/routes.py` file.
+
+**Base URL:** The API is typically accessed at `/api`.
+
+**Authentication:** Authentication is handled using session cookies after a successful login. Admin endpoints require a user with the 'admin' role.
 
 ### Authentication
 - `POST /auth/register`
@@ -37,7 +41,7 @@ API configuration, including database connection details and the secret key, is 
   - Response: Success or error message.
 - `POST /auth/login`
   - Description: Authenticates a user.
-  - Request Body: JSON with `username` and `password`.
+  - Request Body: JSON with `username` or `email`, and `password`.
   - Response: Success message or error (e.g., 401 Unauthorized).
 - `GET /admin/test`
   - Description: Test authenticated access (requires admin role).
