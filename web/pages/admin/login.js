@@ -3,41 +3,56 @@ import Link from 'next/link';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router'; // Using useRouter for pages directory
+import { auth } from '../../utils/firebase'; // Import Firebase auth instance
+import { signInWithEmailAndPassword } from 'firebase/auth'; // Import Firebase login function
 
 const AdminLoginPage = () => {
   const { login } = useAuth();
-  const [username, setUsername] = useState('');
+  // We'll use email instead of username for Firebase Auth
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const router = useRouter();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Username:', username);
+    setErrorMessage(''); // Clear previous errors
+
+    // Basic client-side validation
+    if (!email || !password) {
+      setErrorMessage('Please enter email and password.');
+      return;
+    }
     console.log('Password:', password);
+    console.log('Email:', email);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-    fetch(`${apiUrl}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    })
-    .then(async (response) => {
-      const data = await response.json();
-      if (response.ok) {
-        login(); // Call the login function from AuthContext
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in successfully
+        const user = userCredential.user;
+        console.log('Firebase user logged in:', user);
+        login(); // Update AuthContext state
         router.push('/admin/dashboard'); // Redirect to admin dashboard
-      } else {
-        alert(`Login failed: ${data.message}`); // Display error message
-      }
-    })
-    .catch((error) => {
-      console.error('Error during login:', error);
-      alert('An error occurred during login.'); // Display a generic error message
-    });
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const firebaseErrorMessage = error.message;
+        console.error('Firebase login error:', errorCode, firebaseErrorMessage);
+        // Display a user-friendly error message based on Firebase error code
+        switch (errorCode) {
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            setErrorMessage('Invalid email or password.');
+            break;
+          case 'auth/invalid-email':
+            setErrorMessage('Invalid email format.');
+            break;
+          default:
+            setErrorMessage(`Login failed. Please try again. (Error: ${errorCode})`);
+        }
+      });
   };
-  const router = useRouter();
 
   return (
     <Layout>
@@ -53,10 +68,11 @@ const AdminLoginPage = () => {
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="username">Username:</label>
+          {/* Changed label and state to use email for Firebase Auth */}
+          <label htmlFor="email">Email:</label>
           <input
             type="text"
-            id="username"
+            id="email"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -70,6 +86,12 @@ const AdminLoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+        {errorMessage && (
+          <p style={{ color: 'red' }}>
+            {errorMessage}
+          </p>
+        )}
+
         <button type="submit">Login</button>
       </form>
     </Layout>
