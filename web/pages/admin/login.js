@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/router'; // Using useRouter for pages directory
 import { auth } from '../../utils/firebase'; // Import Firebase auth instance
@@ -8,10 +7,15 @@ import { signInWithEmailAndPassword } from 'firebase/auth'; // Import Firebase l
 
 const AdminLoginPage = () => {
   const { login } = useAuth();
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
+
+  // Redirect if already logged in
+  if (isLoggedIn) {
+    router.push('/admin/dashboard');
+    return null; // Prevent rendering login form if logged in
+  }
   // We'll use email instead of username for Firebase Auth
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
 
   const router = useRouter();
 
@@ -54,27 +58,29 @@ const AdminLoginPage = () => {
       });
   };
 
-  return (
-    <Layout>
-      <div>
-        <h1>Admin Login Page</h1>
-        <p>This is the admin login page content.</p>
-        <div>
-          <Link href="/">Public Menu</Link>
-          <br />
-          <Link href="/register">Register</Link>
-        </div>
-      </div>
+  // Clear error when typing
+  const handleInputChange = (e) => {
+    setErrorMessage('');
+    if (e.target.name === 'email') {
+      setEmail(e.target.value);
+    } else if (e.target.name === 'password') {
+      setPassword(e.target.value);
+    }
+  };
 
+  return (
+    <div>
+      <h1>Admin Login</h1>
       <form onSubmit={handleSubmit}>
         <div>
-          {/* Changed label and state to use email for Firebase Auth */}
           <label htmlFor="email">Email:</label>
           <input
-            type="text"
+            type="email"
             id="email"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            name="email"
+            value={email}
+            onChange={handleInputChange}
+            required
           />
         </div>
         <div>
@@ -82,11 +88,13 @@ const AdminLoginPage = () => {
           <input
             type="password"
             id="password"
+            name="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handleInputChange}
+            required
           />
         </div>
-        {errorMessage && (
+        {error && (
           <p style={{ color: 'red' }}>
             {errorMessage}
           </p>
@@ -95,7 +103,7 @@ const AdminLoginPage = () => {
         <button type="submit">Login</button>
       </form>
     </Layout>
-  );
-};
+
+  )};
 
 export default AdminLoginPage;

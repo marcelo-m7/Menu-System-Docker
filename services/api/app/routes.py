@@ -1,6 +1,7 @@
-from flask import Blueprint, jsonify, request, render_template, session, redirect, url_for, g
+from flask import Blueprint, jsonify, request, render_template, session, redirect, url_for, g, current_app
 from .auth import login_required, role_required
 from .models import (get_db, add_user, get_user_by_username, get_user_by_firebase_uid,
+from werkzeug.exceptions import HTTPException
                      get_all_dishes, get_dish_by_id, add_dish, update_dish, delete_dish,
 from firebase_admin import auth
                      get_all_allergens, get_allergen_by_id, add_allergen, update_allergen, delete_allergen, get_allergen_by_name,
@@ -8,6 +9,13 @@ from firebase_admin import auth
 from .models import get_db
 
 bp = Blueprint('routes', __name__)
+
+# Centralized HTTP error handler
+@bp.app_errorhandler(HTTPException)
+def handle_http_exception(e):
+    response = jsonify({'message': e.description})
+    response.status_code = e.code
+    return response
 
 @bp.route('/')
 def index():
@@ -78,6 +86,7 @@ def manage_dishes():
 
 @bp.route('/admin/dishes/<int:dish_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
+@role_required('admin') # Ensure this is also restricted
 def manage_single_dish(dish_id):
     db = get_db()
 
@@ -130,6 +139,7 @@ def manage_allergens():
 
 @bp.route('/admin/allergens/<int:allergen_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
+@role_required('admin') # Ensure this is also restricted
 def manage_single_allergen(allergen_id):
     db = get_db()
 
@@ -170,6 +180,7 @@ def manage_menu_items():
         # Input Validation for POST
         if not all([week_start_date, week_end_date, day_of_week, dish_id]):
              return jsonify({'message': 'Missing required fields'}), 400
+
         
         # Check if dish_id exists
         try:
@@ -184,6 +195,7 @@ def manage_menu_items():
             return jsonify({'message': f'Dish with ID {dish_id} not found'}), 400
         db.commit()
         return jsonify({'message': 'Menu item added successfully'}), 201
+
 @bp.route('/admin/menu_items/<int:menu_item_id>', methods=['GET', 'PUT', 'DELETE'])
 @role_required('admin')
 def manage_single_menu_item(menu_item_id):
@@ -267,7 +279,7 @@ def register_firebase_user():
         if not firebase_uid or not email:
             return jsonify({'message': 'Missing firebase_uid or email'}), 400
 
-        user = get_user_by_email(email) # Assuming you have a get_user_by_email function in models.py
+        user = get_user_by_email(email) # Assuming you have a get_user_by_email function in models.py or similar logic here
 
         if user:
             # Link existing user with Firebase UID
