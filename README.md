@@ -1,4 +1,4 @@
-# UAlg Cantina Weekly Menu System
+# Cantina Weekly Menu System
 
 ## Description
 A system to manage and display the weekly menu for the UAlg cantina.
