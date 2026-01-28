@@ -1,7 +1,7 @@
 # Cantina Weekly Menu System
 
 ## Description
-A system to manage and display the weekly menu for the UAlg cantina.
+A system to manage and display the weekly menu for the  cantina.
 
 ## Features
 - Public weekly menu display
@@ -22,10 +22,10 @@ A system to manage and display the weekly menu for the UAlg cantina.
 
 ### Cloning the Repository
 
-# UAlg Cantina Weekly Menu System
+#  Cantina Weekly Menu System
 
 ## Description
-A web application to display the weekly menu for the UAlg Cantina and allow administrators to manage menu items, dishes, and allergens.
+A web application to display the weekly menu for the  Cantina and allow administrators to manage menu items, dishes, and allergens.
 
 ## Getting Started
 
